@@ -1,6 +1,10 @@
 local Colours = require("colours")
 local Commands = {}
 
+function Commands.get_script_dir()
+    return debug.getinfo(1, "S").source:sub(2):match("(.*/)")
+end
+
 function Commands.shallow_copy(Table)
     local NewTable = {}
     for Index, Value in ipairs(Table) do
@@ -38,7 +42,6 @@ function Commands.subtract_arrays(TableToBeSubtracted, SubtractingTable)
             end
         end
     end
-    
     return NewTable
 end
 
@@ -51,6 +54,56 @@ function Commands.ensure_confirmation()
     else
         print(Colours.Red.. "Unknown Input: ".. Input .." Assuming confirmation not granted!".. Colours.Reset);
     end
+end
+
+function Commands.fake_error(Message, ExitStatus)
+    print(Colours.Red.. "[EXIT] " .. Message ..Colours.Reset);
+    os.exit(ExitStatus);
+end
+
+function Commands.remove_path(Location, Prefix, Check)
+    if os.execute(Prefix .."test -e " ..Location) then
+        local Confirmation = true;
+        if Check == true then
+            io.write(Colours.Yellow.. Colours.Bold.."[INPUT REQUIRED] Are you sure you would like to REMOVE the path: ".. Location.. " (Y/n) ".. Colours.Reset);
+            Confirmation = Commands.ensure_confirmation();
+        end
+        if Confirmation then
+            print(Colours.Red.. Colours.Bold.."[LOG] Removing path: ".. Location.. Colours.Reset);
+            if os.execute(Prefix.. "rm -r ".. Location) then
+                return;
+            end
+        end
+        Commands.fake_error("Unable to remove path: ".. Location, -2);
+    end
+end
+
+function Commands.create_path(Location, Prefix, Check)
+    if not os.execute(Prefix .."test -e " ..Location) then
+        local Confirmation = true;
+        if Check == true then
+            io.write(Colours.Yellow.. Colours.Bold.. "[INPUT REQUIRED] Are you sure you would like to CREATE the path: ".. Location.. " (Y/n) ".. Colours.Reset);
+            Confirmation = Commands.ensure_confirmation();
+        end
+        if Confirmation then
+            print(Colours.Green.. Colours.Bold.."[LOG] Creating path: ".. Location.. Colours.Reset);
+            if os.execute(Prefix.. "mkdir -p ".. Location) then 
+                return;
+            end
+        end
+        Commands.fake_error("Unable to create path at: ".. Location, -2);
+    end
+end
+
+function Commands.raw_list_to_table(List)
+    local Table = {}
+
+    for Line in List:gmatch("([^\n]+)") do
+        if Line ~= "" then
+            table.insert(Table, Line);
+        end
+    end
+    return Table;
 end
 
 return Commands;

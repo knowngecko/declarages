@@ -9,7 +9,7 @@ local Configuration = {
         "linux-zen", "linux-zen-headers",
         "linux-firmware",
         "flatpak", -- Required for script
-        --"zsh", -- The shell is ZSH for root
+        "zsh", -- The shell is ZSH for root
         "zsh-syntax-highlighting",
         "zsh-autosuggestions",
         "zsh-history-substring-search",
@@ -79,8 +79,13 @@ local Configuration = {
         "firefox", "geckodriver",
         "neovim",
         "pacman-contrib",
+        "jshon",
+        "lua-lanes",
+        "lua-luv",
+
        },
        
+       CustomLocation = "/home/pika/.aur/",
        Custom = {
         --> Simple AUR
         "nvm", "vscodium",
@@ -106,6 +111,8 @@ local Configuration = {
     Settings = {
         WarnOnPackageRemovalAbove = 5;
         SuperuserCommand = "sudo";
+        AddPathConfirmation = true;
+        RemovePathConfirmation = true;
         Cores = { "pacman" }
     }
 }
