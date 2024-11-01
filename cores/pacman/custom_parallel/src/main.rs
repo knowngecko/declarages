@@ -19,8 +19,8 @@ fn main() {
             
             let current_version = String::from_utf8(Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& makepkg --printsrcinfo | awk -F ' = ' '/pkgver/ {print $2}'").output().expect("failedtoexec").stdout).unwrap();
             Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& git pull").output().expect("failedtoexec");
+            Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& makepkg -o").output().expect("failedtoexec");
             let new_version = String::from_utf8(Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& makepkg --printsrcinfo | awk -F ' = ' '/pkgver/ {print $2}'").output().expect("failedtoexec").stdout).unwrap();
-
             if current_version != new_version {
                 println!("[LOG] Needs Update: {} ", package);
                 return package;
