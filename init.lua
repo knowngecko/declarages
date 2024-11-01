@@ -10,8 +10,9 @@ if Configuration.Settings.SuperuserCommand ~= "" then Configuration.Settings.Sup
 print(Colours.Blue.. "[ENTER] Beginning".. Colours.Reset);
 for Index, Value in pairs(Configuration["Settings"]["Cores"]) do
     Value = string.lower(Value);
-    print(Colours.Magenta.. Colours.Bold.. "[LOG] Executing: ".. Value.. " Core".. Colours.Reset)
     local Core = require("cores/"..Value.."/"..Value);
+    Value = Value:gsub("^%l", string.upper)
+    print(Colours.Magenta.. Colours.Bold.. "[LOG] Executing: ".. Value.. " Core".. Colours.Reset)
     Core.execute(Configuration);
     print(Colours.Magenta.. Colours.Bold.. "[LOG] Completed: ".. Value.. " Core".. Colours.Reset)
 end
