@@ -2,7 +2,7 @@ local Colours = require("colours")
 local Commands = {}
 
 function Commands.get_script_dir()
-    return debug.getinfo(1, "S").source:sub(2):match("(.*/)")
+    return debug.getinfo(1, "S").source:sub(2):match("(.*/)") or "./"
 end
 
 function Commands.shallow_copy(Table)

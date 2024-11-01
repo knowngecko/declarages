@@ -3,7 +3,7 @@
 _pkgname="declarages"
 pkgname="$_pkgname-git"
 pkgrel=1
-pkgver=1.1
+pkgver=1.2
 pkgdesc="A way to manage your packages in lua"
 arch=("x86_64")
 url="https://github.com/knowngecko/declarages.git"

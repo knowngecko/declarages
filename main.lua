@@ -1,4 +1,5 @@
-package.path = package.path .. ";" ..  debug.getinfo(1, "S").source:sub(2):match("(.*/)") .. "?.lua";
+local relative_script_path = debug.getinfo(1, "S").source:sub(2):match("(.*/)") or "./"
+package.path = package.path .. ";" ..  relative_script_path .. "?.lua";
 local Common = require("common");
 
 --> Decipher argument path
