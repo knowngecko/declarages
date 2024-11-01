@@ -41,14 +41,33 @@ local function convert_to_sub_package_names(Array)
 end
 
 function Run.execute(Configuration)
+
+    --> Remove Unused Dependencies
+    local UnusedDeps = Common.raw_list_to_table(Common.execute_command("pacman -Qtdq", nil));
+    local Continue = Common.check_package_warn_limit(UnusedDeps, Configuration.Settings.WarnOnPackageRemovalAbove);
+    if Continue and #UnusedDeps > 0 then
+        local RemovalString = "pacman -Rns --noconfirm";
+        io.write(Colours.Bold.. "[LOG] Removing Unused Dependencies: ".. Colours.Reset)
+        for Index, Value in ipairs(UnusedDeps) do
+            io.write(Value.. " ");
+            RemovalString = RemovalString.. " " ..Value;
+        end
+        print("");
+        Common.execute_command(RemovalString, Configuration.Settings.SuperuserCommand);
+        io.write(Colours.Green.. Colours.Bold.. "[LOG] Removed Packages: ");
+        for Index, Value in ipairs(UnusedDeps) do
+            io.write(Value.. " ");
+        end
+        io.write(Colours.Reset.. "\n");
+    end
+
+
     --> Get installed packages
     local InstalledPackages = Common.raw_list_to_table(Common.execute_command("pacman -Qeq"));
 
     --> Remove installed packages that are no longer required
     local CombinedNameOnlyPackages = convert_to_sub_package_names(Common.merge_arrays(Configuration.Pacman.Official, Configuration.Pacman.Custom))
     local PackagesToRemove = Common.subtract_arrays(InstalledPackages, CombinedNameOnlyPackages);
-
-
     local Confirmation = Common.check_package_warn_limit(PackagesToRemove, Configuration.Settings.WarnOnPackageRemovalAbove);
 
     if Confirmation == true and #PackagesToRemove > 0 then
@@ -149,19 +168,19 @@ function Run.execute(Configuration)
             end
         end
         if Hits ~= #SubPackages then --> We don't have (all) the package(s) installed, install the package
-            print(Colours.Green.. Colours.Bold.. "[LOG] Installing: ".. Value.. Colours.Reset);
-            local Url = "https://aur.archlinux.org./"..Value..".git";
+            local DirName = get_base_packages(Value);
+            print(Colours.Green.. Colours.Bold.. "[LOG] Installing: ".. DirName.. Colours.Reset);
+            local Url = "https://aur.archlinux.org./"..DirName..".git";
             if type(Value) == "table" then
                 if Value.Url ~= nil then
                     Url = Value.Url;
                 end
             end
-            local DirName = get_base_packages(Value);
 
-            Common.remove_path(Configuration.Pacman.CustomLocation.."/"..Value, Configuration.Settings.SuperuserCommand, Configuration.Settings.RemovePathConfirmation);
+            Common.remove_path(Configuration.Pacman.CustomLocation.."/"..DirName, Configuration.Settings.SuperuserCommand, Configuration.Settings.RemovePathConfirmation);
             Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."&& git clone ".. Url, nil);
-            Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."/"..Value.."/".."&& makepkg -si --noconfirm", nil);
-            print(Colours.Green.. Colours.Bold.. "[LOG] Completed: ".. Value.. Colours.Reset);
+            Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."/"..DirName.."/".."&& makepkg -si --noconfirm", nil);
+            print(Colours.Green.. Colours.Bold.. "[LOG] Completed: ".. DirName.. Colours.Reset);
         end
     end
     print(Colours.Bold.. Colours.Green.. "[LOG] Completed Custom Installations".. Colours.Reset);

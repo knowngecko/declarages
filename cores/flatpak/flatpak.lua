@@ -16,7 +16,7 @@ function Run.execute(Configuration)
     local Confirmation = Common.check_package_warn_limit(PackagesToRemove, Configuration.Settings.WarnOnPackageRemovalAbove);
 
     if Confirmation == true and #PackagesToRemove > 0 then
-        local RemovalString = "flatpak uninstall --assumeyes";
+        local RemovalString = "flatpak uninstall --unused --assumeyes";
         io.write(Colours.Bold.. "[LOG] Removing: ".. Colours.Reset)
         for Index, Value in ipairs(PackagesToRemove) do
             io.write(Value.. " ");

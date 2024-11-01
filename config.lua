@@ -85,7 +85,7 @@ local Configuration = {
        CustomLocation = "/home/pika/.aur/",
        Custom = {
         --> Simple AUR
-        "nvm", "vscodium",
+        "vscodium-bin",
         "zapzap",
         "jellyfin-media-player",
         "nvim-lazy",
