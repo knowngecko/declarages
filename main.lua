@@ -1,8 +1,15 @@
+local Common = require("common")
+
+--> Decipher argument path
+local FileName = "packages";
 if arg[1] ~= nil then
-    print("Arg1 not nil", arg[1])
-    package.path = package.path .. ";" .. arg[1] .. "/?.lua"
+    FileName = arg[1]:match("([^/]+)$"):gsub("%.lua$", "")
+    local Directory = arg[1]:match("^(.*)/").. "/"
+    print(Directory, FileName)
+    package.path = package.path .. ";" .. Directory .. "/?.lua"
 end
-local Configuration = require("config");
+
+local Configuration = require(FileName);
 local Colours = require("colours")
 
 if Configuration.Settings.SuperuserCommand ~= "" then Configuration.Settings.SuperuserCommand = Configuration.Settings.SuperuserCommand.. " "; end
