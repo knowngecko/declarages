@@ -13,8 +13,7 @@ function Commands.shallow_copy(Table)
     return NewTable;
 end
 
-function Commands.execute_command(Command, Prefix)
-    if Prefix then Command = Prefix..Command; end
+function Commands.execute_command(Command)
     local Handle = io.popen(Command);
     local Result;
     if Handle ~= nil then

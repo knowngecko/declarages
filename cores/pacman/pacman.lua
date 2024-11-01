@@ -43,7 +43,7 @@ end
 function Run.execute(Configuration)
 
     --> Remove Unused Dependencies
-    local UnusedDeps = Common.raw_list_to_table(Common.execute_command("pacman -Qtdq", nil));
+    local UnusedDeps = Common.raw_list_to_table(Common.execute_command("pacman -Qtdq"));
     local Continue = Common.check_package_warn_limit(UnusedDeps, Configuration.Settings.WarnOnPackageRemovalAbove);
     if Continue and #UnusedDeps > 0 then
         local RemovalString = "pacman -Rns --noconfirm";
@@ -53,7 +53,7 @@ function Run.execute(Configuration)
             RemovalString = RemovalString.. " " ..Value;
         end
         print("");
-        Common.execute_command(RemovalString, Configuration.Settings.SuperuserCommand);
+        Common.execute_command(Configuration.Settings.SuperuserCommand.. RemovalString);
         io.write(Colours.Green.. Colours.Bold.. "[LOG] Removed Packages: ");
         for Index, Value in ipairs(UnusedDeps) do
             io.write(Value.. " ");
@@ -97,7 +97,7 @@ function Run.execute(Configuration)
                 print(Colours.Bold.. Colours.Yellow.. "[WARNING]".. Colours.Reset .. Colours.Bold.." Unable to remove ".. Value .." as the following depend upon it:" .. Colours.Reset);
                 io.write(DependenciesRaw);
                 print(Colours.Bold.. "[LOG] Marking ".. Value .." install reason as dependency".. Colours.Reset);
-                Common.execute_command("pacman -D --asexplicit".. Value, Configuration.Settings.SuperuserCommand);
+                Common.execute_command(Configuration.Settings.SuperuserCommand.. "pacman -D --asexplicit".. Value);
                 print("");
             end
         end
@@ -110,7 +110,7 @@ function Run.execute(Configuration)
                 RemovalString = RemovalString.. " " ..Value;
             end
             print("");
-            Common.execute_command(RemovalString, Configuration.Settings.SuperuserCommand);
+            Common.execute_command(Configuration.Settings.SuperuserCommand.. RemovalString);
             io.write(Colours.Green.. Colours.Bold.. "[LOG] Removed Packages: ");
             for Index, Value in ipairs(PackagesToRemove) do
                 io.write(Value.. " ");
@@ -120,7 +120,7 @@ function Run.execute(Configuration)
     end
 
     --> Delete Old Custom Package directories
-    local InstalledCustomPackages = Common.raw_list_to_table(Common.execute_command("ls ".. Configuration.Pacman.CustomLocation, Configuration.Settings.SuperuserCommand));
+    local InstalledCustomPackages = Common.raw_list_to_table(Common.execute_command(Configuration.Settings.SuperuserCommand.. "ls ".. Configuration.Pacman.CustomLocation));
     local UnrequiredCustom = Common.subtract_arrays(InstalledCustomPackages, convert_to_base_package_names(Configuration.Pacman.Custom))
     for Index, Value in ipairs(UnrequiredCustom) do
         Common.remove_path(Configuration.Pacman.CustomLocation.."/"..Value, Configuration.Settings.SuperuserCommand, Configuration.Settings.AddPathConfirmation);
