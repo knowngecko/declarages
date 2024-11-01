@@ -22,7 +22,7 @@ fn main() {
             Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& makepkg -o").output().expect("failedtoexec");
             let new_version = String::from_utf8(Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& makepkg --printsrcinfo | awk -F ' = ' '/pkgver/ {print $2}'").output().expect("failedtoexec").stdout).unwrap();
             if current_version != new_version {
-                println!("[LOG] Needs Update: {} ", package);
+                println!("\x1b[33m[LOG] Needs Update: {} \x1b[0m", package);
                 return package;
             } else {
                 println!("[LOG] Already Up to Date: {} ", package);
@@ -39,7 +39,7 @@ fn main() {
                 if package != "".to_string() {
                     println!("[LOG] Updating: {}", package);
                     Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& makepkg -si --noconfirm").output().expect("failedtoexec");
-                    println!("[LOG] Completed: {}", package);
+                    println!("\x1b[32m[LOG] Completed: {}\x1b[0m", package);
                 }
             },
             Err(_) => (),
