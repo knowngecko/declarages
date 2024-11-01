@@ -1,6 +1,5 @@
 local Common = require("common")
 local Colours = require("colours")
-local Luv = require("luv")
 local Run = {};
 
 local function get_sub_packages(input)
@@ -42,24 +41,15 @@ local function convert_to_sub_package_names(Array)
 end
 
 function Run.execute(Configuration)
-    --> Get installed pacakges
+    --> Get installed packages
     local InstalledPackages = Common.raw_list_to_table(Common.execute_command("pacman -Qeq"));
 
     --> Remove installed packages that are no longer required
     local CombinedNameOnlyPackages = convert_to_sub_package_names(Common.merge_arrays(Configuration.Pacman.Official, Configuration.Pacman.Custom))
     local PackagesToRemove = Common.subtract_arrays(InstalledPackages, CombinedNameOnlyPackages);
 
-    local Confirmation = true;
-    if #PackagesToRemove > Configuration.Settings.WarnOnPackageRemovalAbove then
-        print(Colours.Bold.. Colours.Yellow.. "[WARNING]".." Are you sure you would like to remove these ".. #PackagesToRemove .." packages?".. Colours.Reset);
-        for Index, Value in ipairs(PackagesToRemove) do
-            io.write(Value.." ");
-        end
-        print("");
-        io.write("(Y/n) ");
-        Confirmation = Common.ensure_confirmation();
-        print("");
-    end
+
+    local Confirmation = Common.check_package_warn_limit(PackagesToRemove, Configuration.Settings.WarnOnPackageRemovalAbove);
 
     if Confirmation == true and #PackagesToRemove > 0 then
         --> Need to check if the packages are dependencies of other packages before attempting removal

@@ -7,9 +7,12 @@ local Colours = require("colours")
 
 if Configuration.Settings.SuperuserCommand ~= "" then Configuration.Settings.SuperuserCommand = Configuration.Settings.SuperuserCommand.. " "; end
 
+print(Colours.Blue.. "[ENTER] Beginning".. Colours.Reset);
 for Index, Value in pairs(Configuration["Settings"]["Cores"]) do
+    Value = string.lower(Value);
     print(Colours.Magenta.. Colours.Bold.. "[LOG] Executing: ".. Value.. " Core".. Colours.Reset)
     local Core = require("cores/"..Value.."/"..Value);
     Core.execute(Configuration);
     print(Colours.Magenta.. Colours.Bold.. "[LOG] Completed: ".. Value.. " Core".. Colours.Reset)
 end
+print(Colours.Blue.. "[EXIT] Finished".. Colours.Reset);

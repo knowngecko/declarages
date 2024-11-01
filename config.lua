@@ -36,7 +36,7 @@ local Configuration = {
         "cuda",
         "libnotify",
         "cryptsetup",
-    
+
         --> Apps
         "rustup",
         "fastfetch",
@@ -80,11 +80,8 @@ local Configuration = {
         "neovim",
         "pacman-contrib",
         "jshon",
-        "lua-lanes",
-        "lua-luv",
-
        },
-       
+
        CustomLocation = "/home/pika/.aur/",
        Custom = {
         --> Simple AUR
@@ -100,19 +97,24 @@ local Configuration = {
         "drm_info-git",
         "zen-browser-avx2-bin",
         "python-selenium",
-    
+ 
         --> Advanced AUR
         { Base = "Rust-VPN-Handler", Sub = {"vpn_handler"}, Url = "https://github.com/kingdomkind/Rust-VPN-Handler.git"},
         { Base = "symlink-manager", Sub = {"symlink-manager-git"}, Url = "https://github.com/knowngecko/symlink-manager.git"},
        },
     },
 
+    Flatpak = {
+        "com.github.IsmaelMartinez.teams_for_linux",
+	    "com.valvesoftware.Steam",
+    };
+
     Settings = {
         WarnOnPackageRemovalAbove = 5;
         SuperuserCommand = "sudo";
         AddPathConfirmation = true;
         RemovePathConfirmation = true;
-        Cores = { "pacman" }
+        Cores = { "Pacman", "Flatpak" }
     }
 }
 

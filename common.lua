@@ -111,4 +111,19 @@ function Commands.raw_list_to_table(List)
     return Table;
 end
 
+function Commands.check_package_warn_limit(PackagesTableToRemove, PackageWarnLimit)
+    local Confirmation = true;
+    if #PackagesTableToRemove > PackageWarnLimit then
+        print(Colours.Bold.. Colours.Yellow.. "[WARNING]".." Are you sure you would like to remove these ".. #PackagesTableToRemove .." packages?".. Colours.Reset);
+        for Index, Value in ipairs(PackagesTableToRemove) do
+            io.write(Value.." ");
+        end
+        print("");
+        io.write("(Y/n) ");
+        Confirmation = Commands.ensure_confirmation();
+        print("");
+    end
+    return Confirmation;
+end
+
 return Commands;
