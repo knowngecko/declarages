@@ -178,8 +178,8 @@ function Run.execute(Configuration)
             end
 
             Common.remove_path(Configuration.Pacman.CustomLocation.."/"..DirName, Configuration.Settings.SuperuserCommand, Configuration.Settings.RemovePathConfirmation);
-            Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."&& git clone ".. Url, nil);
-            Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."/"..DirName.."/".."&& makepkg -si --noconfirm", nil);
+            Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."&& git clone ".. Url);
+            Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."/"..DirName.."/".."&& makepkg -si --noconfirm");
             print(Colours.Green.. Colours.Bold.. "[LOG] Completed: ".. DirName.. Colours.Reset);
         end
     end

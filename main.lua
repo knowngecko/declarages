@@ -1,4 +1,5 @@
-local Common = require("common")
+package.path = package.path .. ";" ..  debug.getinfo(1, "S").source:sub(2):match("(.*/)") .. "?.lua";
+local Common = require("common");
 
 --> Decipher argument path
 local FileName = "packages";
@@ -7,6 +8,8 @@ if arg[1] ~= nil then
     local Directory = arg[1]:match("^(.*)/").. "/"
     print(Directory, FileName)
     package.path = package.path .. ";" .. Directory .. "/?.lua"
+else
+    --package = package.path.. ";" 
 end
 
 local Configuration = require(FileName);
