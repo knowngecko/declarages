@@ -101,6 +101,7 @@ local Configuration = {
         --> Advanced AUR
         { Base = "Rust-VPN-Handler", Sub = {"vpn_handler"}, Url = "https://github.com/kingdomkind/Rust-VPN-Handler.git"},
         { Base = "symlink-manager", Sub = {"symlink-manager-git"}, Url = "https://github.com/knowngecko/symlink-manager.git"},
+        { Base = "declarages", Sub = {"declarages-git"}, Url = "https://github.com/knowngecko/declarages.git"},
        },
     },
 
