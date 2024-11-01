@@ -7,7 +7,6 @@ local FileName = "packages";
 if arg[1] ~= nil then
     FileName = arg[1]:match("([^/]+)$"):gsub("%.lua$", "")
     local Directory = arg[1]:match("^(.*)/").. "/"
-    print(Directory, FileName)
     package.path = package.path .. ";" .. Directory .. "/?.lua"
 else
     --package = package.path.. ";" 
