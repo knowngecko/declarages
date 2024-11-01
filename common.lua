@@ -16,8 +16,13 @@ end
 function Commands.execute_command(Command, Prefix)
     if Prefix then Command = Prefix..Command; end
     local Handle = io.popen(Command);
-    local Result = Handle:read("a");
-    Handle:close();
+    local Result;
+    if Handle ~= nil then
+        Result = Handle:read("a");
+        Handle:close();
+    else
+        Command.fake_error("Unable to open handle in lua - io.popen failed!", -3)
+    end
     return Result;
 end
 

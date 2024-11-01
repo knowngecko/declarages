@@ -92,7 +92,6 @@ local Configuration = {
         "zapzap",
         "jellyfin-media-player",
         "nvim-lazy",
-        "prismlauncher",
         "picom-git",
         "brave-bin",
         "epson-inkjet-printer-escpr",

@@ -41,28 +41,6 @@ local function convert_to_sub_package_names(Array)
     return NamedPackages;
 end
 
-local function update_custom_packages(Value, Location)
-    local Task = function(Value, Location)
-        local Colours = { Reset = "\27[0m", Bold = "\27[1m", Green = "\27[32m", }
-        
-        local function execute_command(Command, Prefix)
-            if Prefix then Command = Prefix..Command; end local Handle = io.popen(Command); local Result = Handle:read("a"); Handle:close(); return Result;
-        end
-
-        local CurrentVersion = execute_command("cd ".. Location.."/"..Value.."/".."&& makepkg --printsrcinfo | awk -F ' = ' '/pkgver/ {print $2}'", nil);
-        execute_command("cd ".. Location.."/"..Value.."/".."&& git pull");
-        local NewVersion = execute_command("cd ".. Location.."/"..Value.."/".."&& makepkg --printsrcinfo | awk -F ' = ' '/pkgver/ {print $2}'", nil);
-        if NewVersion ~= CurrentVersion then
-            print(Colours.Bold.. "[LOG] Updating: ".. Value.. Colours.Reset);
-            os.execute("cd ".. Location.."/"..Value.."/".."&& makepkg -si --noconfirm ");
-            print(Colours.Green.. Colours.Bold.. "[LOG] Completed: ".. Value.. Colours.Reset);
-        else
-            print(Colours.Bold.. "[LOG] Already Up to Date: ".. Value.. Colours.Reset);
-        end
-    end
-    local Thread = Luv.new_thread(Task, Value, Location);
-end
-
 function Run.execute(Configuration)
     --> Get installed pacakges
     local InstalledPackages = Common.raw_list_to_table(Common.execute_command("pacman -Qeq"));
@@ -145,60 +123,58 @@ function Run.execute(Configuration)
 
     local InstallString = "pacman -Syu --noconfirm";
     if #PackagesToInstallOfficial > 0 then
-        io.write(Colours.Bold.. "[LOG] Upgrading System & Attempting to install: ".. Colours.Reset);
+        io.write(Colours.Bold.. Colours.Cyan.. "[LOG] Upgrading System & Attempting to install: ".. Colours.Reset);
         for Index, Value in ipairs(PackagesToInstallOfficial) do
             io.write(Value.. " ");
             InstallString = InstallString .." ".. Value;
         end
         print(""); 
     else
-        print(Colours.Bold .."[LOG] Upgrading System".. Colours.Reset);
+        print(Colours.Bold.. Colours.Cyan.."[LOG] Upgrading System".. Colours.Reset);
     end
 
     os.execute(Configuration.Settings.SuperuserCommand.. InstallString);
     print(Colours.Bold.. Colours.Green.. "[LOG] Completed Installations".. Colours.Reset);
+    print(Colours.Bold.. Colours.Cyan.. "[LOG] Upgrading Custom Packages".. Colours.Reset);
 
     Common.create_path(Configuration.Pacman.CustomLocation, "", Configuration.Settings.AddPathConfirmation);
-    local InstalledCustomPackages = Common.raw_list_to_table(Common.execute_command("ls ".. Configuration.Pacman.CustomLocation, Configuration.Settings.SuperuserCommand));
 
-    --> Update Installed Custom packages 
-    --[[ NON-MULTI-THREADED WAY
-    for Index, Value in ipairs(InstalledCustomPackages) do
-        local CurrentVersion = Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."/"..Value.."/".."&& makepkg --printsrcinfo | awk -F ' = ' '/pkgver/ {print $2}'", nil);
-        Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."/"..Value.."/".."&& git pull");
-        local NewVersion = Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."/"..Value.."/".."&& makepkg --printsrcinfo | awk -F ' = ' '/pkgver/ {print $2}'", nil);
-        if NewVersion ~= CurrentVersion then
-           print(Colours.Bold.. "[LOG] Updating: ".. Value.. Colours.Reset);
-            os.execute("cd ".. Configuration.Pacman.CustomLocation.."/"..Value.."/".."&& makepkg -si --noconfirm ");
-            print(Colours.Green.. Colours.Bold.. "[LOG] Completed: ".. Value.. Colours.Reset);
-        else
-            print(Colours.Bold.. "[LOG] Already Up to Date: ".. Value.. Colours.Reset);
+    --> Updating existing AUR packages via Rust Program (parallel running)
+    os.execute(Common.get_script_dir().. "/cores/pacman/custom_parallel/target/release/custom_parallel ".. Configuration.Pacman.CustomLocation);
+
+    --> Install AUR packages we don't have
+    for Index, Value in ipairs(Configuration.Pacman.Custom) do
+        local SubPackages = get_sub_packages(Value);
+        if type(SubPackages) ~= "table" then
+            SubPackages = { SubPackages };
         end
-    end ]]
 
-    --> MULTI-THREADED WAY
-    for Index, Value in ipairs(InstalledCustomPackages) do
-        update_custom_packages(Value, Configuration.Pacman.CustomLocation)
-    end
-    Luv.run()
-
-    local CustomPackagesToInstall = Common.subtract_arrays(convert_to_base_package_names(Configuration.Pacman.Custom), InstalledCustomPackages);
-
-    for Index, Value in ipairs(CustomPackagesToInstall) do
-        print(Colours.Green.. Colours.Bold.. "[LOG] Installing: ".. Value.. Colours.Reset);
-        local Url = "https://aur.archlinux.org./"..Value..".git";
-        for Index2, Value2 in ipairs(Configuration.Pacman.Custom) do
-            if type(Value2) == "table" then
-                if Value2.Base == Value then
-                    Url = Value2.Url;
+        local Hits = 0;
+        for Index2, Value2 in ipairs(SubPackages) do
+            for Index3, Value3 in ipairs(InstalledPackages) do
+                if Value2 == Value3 then
+                    Hits = Hits + 1;
+                    break;
                 end
             end
         end
+        if Hits ~= #SubPackages then --> We don't have (all) the package(s) installed, install the package
+            print(Colours.Green.. Colours.Bold.. "[LOG] Installing: ".. Value.. Colours.Reset);
+            local Url = "https://aur.archlinux.org./"..Value..".git";
+            if type(Value) == "table" then
+                if Value.Url ~= nil then
+                    Url = Value.Url;
+                end
+            end
+            local DirName = get_base_packages(Value);
 
-        Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."&& git clone ".. Url, nil);
-        Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."/"..Value.."/".."&& makepkg -si --noconfirm", nil);
-        print(Colours.Green.. Colours.Bold.. "[LOG] Completed: ".. Value.. Colours.Reset);
+            Common.remove_path(Configuration.Pacman.CustomLocation.."/"..Value, Configuration.Settings.SuperuserCommand, Configuration.Settings.RemovePathConfirmation);
+            Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."&& git clone ".. Url, nil);
+            Common.execute_command("cd ".. Configuration.Pacman.CustomLocation.."/"..Value.."/".."&& makepkg -si --noconfirm", nil);
+            print(Colours.Green.. Colours.Bold.. "[LOG] Completed: ".. Value.. Colours.Reset);
+        end
     end
+    print(Colours.Bold.. Colours.Green.. "[LOG] Completed Custom Installations".. Colours.Reset);
 end
 
 return Run

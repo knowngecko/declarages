@@ -1,3 +1,6 @@
+/*
+*   REMEMBER TO DO "cargo build --release" TO UPDATE THE BINARY FOR THE PACMAN CORE TO EXECUTE
+*/
 use std::{env, process::Command, thread::{self, JoinHandle}};
 
 fn main() {
@@ -9,7 +12,7 @@ fn main() {
     let custom_packages = String::from_utf8(output.stdout).unwrap();
     let custom_packages_vec: Vec<String> = custom_packages.split('\n').map(|x| x.to_string()).filter(|x| x != "").collect();
     let mut handles: Vec<JoinHandle<String>> = vec![];
-    println!("\x1b[1m");
+    print!("\x1b[1m");
 
     for package in custom_packages_vec {
         let handle = thread::spawn(move || {
@@ -42,5 +45,5 @@ fn main() {
             Err(_) => (),
         }
     }
-    println!("\x1b[0m");
+    print!("\x1b[0m");
 }
