@@ -97,7 +97,7 @@ function Run.execute(Configuration)
                 print(Colours.Bold.. Colours.Yellow.. "[WARNING]".. Colours.Reset .. Colours.Bold.." Unable to remove ".. Value .." as the following depend upon it:" .. Colours.Reset);
                 io.write(DependenciesRaw);
                 print(Colours.Bold.. "[LOG] Marking ".. Value .." install reason as dependency".. Colours.Reset);
-                Common.execute_command(Configuration.Settings.SuperuserCommand.. "pacman -D --asexplicit".. Value);
+                Common.execute_command(Configuration.Settings.SuperuserCommand.. "pacman -D --asdep ".. Value);
                 print("");
             end
         end
@@ -110,7 +110,7 @@ function Run.execute(Configuration)
                 RemovalString = RemovalString.. " " ..Value;
             end
             print("");
-            Common.execute_command(Configuration.Settings.SuperuserCommand.. RemovalString);
+            os.execute(Configuration.Settings.SuperuserCommand.. RemovalString);
             io.write(Colours.Green.. Colours.Bold.. "[LOG] Removed Packages: ");
             for Index, Value in ipairs(PackagesToRemove) do
                 io.write(Value.. " ");
@@ -129,6 +129,14 @@ function Run.execute(Configuration)
     --> Install packages we don't have
     local OfficialNameOnlyPackages = convert_to_base_package_names(Configuration.Pacman.Official);
     local PackagesToInstallOfficial = Common.subtract_arrays(OfficialNameOnlyPackages, InstalledPackages);
+
+    for Index, Package in ipairs(PackagesToInstallOfficial) do
+        if Common.execute_command("pacman -Qq | grep ".. Package) then
+            print(Colours.Bold.. "[LOG] Marking ".. Package .. " install reason as explicit".. Colours.Reset);
+            Common.execute_command(Configuration.Settings.SuperuserCommand.. "pacman -D --asexplicit ".. Package);
+            table.remove(PackagesToInstallOfficial, Index);
+        end
+    end
 
     local InstallString = "pacman -Syu --noconfirm";
     if #PackagesToInstallOfficial > 0 then

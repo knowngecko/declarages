@@ -17,12 +17,13 @@ fn main() {
 
     for package in custom_packages_vec {
         let handle = thread::spawn(move || {
-            let current_version = String::from_utf8(Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& makepkg --printsrcinfo | awk -F ' = ' '/pkgver/ {print $2}'").output().expect("failedtoexec").stdout).unwrap();
-            Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& git pull").output().expect("failedtoexec");
+            let mut current_version = String::from_utf8(Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& makepkg --printsrcinfo | awk -F ' = ' '/pkgver/ {print $2}'").output().expect("failedtoexec").stdout).unwrap();
+            Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& git reset --hard && git pull").output().expect("failedtoexec");
             //Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& makepkg -o").output().expect("failedtoexec");
-            let new_version = String::from_utf8(Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& makepkg --printsrcinfo | awk -F ' = ' '/pkgver/ {print $2}'").output().expect("failedtoexec").stdout).unwrap();
+            let mut new_version = String::from_utf8(Command::new("bash").arg("-c").arg("cd ".to_owned() + &package + "&& makepkg --printsrcinfo | awk -F ' = ' '/pkgver/ {print $2}'").output().expect("failedtoexec").stdout).unwrap();
             if current_version != new_version {
-                println!("\x1b[33m[LOG] Needs Update: {} \x1b[0m\x1b[1m", package);
+                println!("\x1b[33m[LOG] Needs Update: {} (Old: {:?}, New: {:?})\x1b[0m\x1b[1m", package, current_version.pop(), new_version.pop());
+                println!("Current Version: {}, New Version: {}", current_version, new_version);
                 return package;
             } else {
                 println!("[LOG] Already Up to Date: {}", package);
