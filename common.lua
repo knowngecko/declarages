@@ -1,6 +1,13 @@
 local Colours = require("colours")
 local Commands = {}
 
+Commands.DateCommand = "date +%s%N | cut -b1-13"
+
+
+function Commands.round_to_2dp(Number)
+    return tonumber(string.format("%.2f", Number))
+end
+
 function Commands.get_script_dir()
     return debug.getinfo(1, "S").source:sub(2):match("(.*/)") or "./"
 end
