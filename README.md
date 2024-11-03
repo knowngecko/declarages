@@ -58,7 +58,7 @@ local Configuration = {
 ```
 - Pacman Table: Contained within Configuration
 - Official Table: List packages as strings that you want installed on the system
-- CustomLocation: Installation directory for AUR or Custom packages - **please changer user to your username**
+- CustomLocation: Installation directory for AUR or Custom packages - **please change user to your username**
 - Custom Table: Specifying the package just as a string assumes that that the string is the only package installed from the PKGBUILD it clones. It is assumed that the package is in the AUR. You can optionally choose to insert a table instead. This is required if the PKGBUILD that is cloned has multiple sub-packages that are installed, ie. you must list all the packages the PKGBUILD installs in sub-packages (including the base package name if applicable). The URL can also be specified to change where the PKGBUILD is pulled from, allowing packages from outside the AUR to be installed as depicted. Please note that this URL is only read from upon cloning - it is not used again and therefore if you wish to change the URL you should remove the package, rebuild and add the new package.
 
 **Flatpak Core**
