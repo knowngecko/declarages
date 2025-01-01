@@ -3,6 +3,9 @@ local Colours = require("colours")
 local Run = {};
 
 function Run.execute(Configuration)
+    local RemoveUnused = "flatpak uninstall --unused --assumeyes";
+    Common.execute_command(RemoveUnused);
+
     local InstalledPackages = Common.raw_list_to_table(Common.execute_command("flatpak list --app --columns=application"));
 
     for Index, Value in ipairs(InstalledPackages) do --> Sometimes the "Application ID" header pops up
@@ -16,7 +19,7 @@ function Run.execute(Configuration)
     local Confirmation = Common.check_package_warn_limit(PackagesToRemove, Configuration.Settings.WarnOnPackageRemovalAbove);
 
     if Confirmation == true and #PackagesToRemove > 0 then
-        local RemovalString = "flatpak uninstall --unused --assumeyes";
+        local RemovalString = "flatpak uninstall --assumeyes";
         io.write(Colours.Bold.. "[LOG] Removing: ".. Colours.Reset)
         for Index, Value in ipairs(PackagesToRemove) do
             io.write(Value.. " ");
